@@ -1,0 +1,48 @@
+generator client{
+provider="prisma-client-js"
+}
+datasource db{
+provider="postgresql"
+url=env("DATABASE_URL")
+}
+enum Presenca{
+SIM
+NAO
+}
+model Convidado{
+id String @id @default(cuid())
+nome String
+telefone String @unique
+presenca Presenca @default(SIM)
+adultos Int @default(1)
+criancas Int @default(0)
+mensagem String?
+presenteOutro String?
+pixValor Decimal? @db.Decimal(10,2)
+pixEm DateTime?
+presentes Presente[]
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+}
+model Presente{
+id String @id @default(cuid())
+nome String
+categoria String
+ordem Int @default(0)
+ativo Boolean @default(true)
+convidadoId String?
+convidado Convidado? @relation(fields:[convidadoId],references:[id],onDelete:SetNull)
+reservadoEm DateTime?
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+@@index([convidadoId])
+}
+model Configuracao{
+id String @id @default("default")
+pixChave String @default("")
+pixNome String @default("Joao e Elen")
+pixCidade String @default("Lauro de Freitas")
+pixCopiaECola String @default("")
+pixLink String @default("")
+updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cha-casa-nova-db
+    environment:
+      POSTGRES_USER: cha
+      POSTGRES_PASSWORD: cha
+      POSTGRES_DB: cha_casa_nova
+    ports:
+      - "5432:5432"
+    volumes:
+      - cha_casa_nova_pg:/var/lib/postgresql/data
+  api:
+    build: .
+    container_name: cha-casa-nova-api
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://cha:cha@db:5432/cha_casa_nova
+      JWT_SECRET: ${JWT_SECRET:-cha-casa-nova-jwt-secret-change-in-production}
+      JWT_EXPIRES_IN: 7d
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      PORT: 3001
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      NODE_ENV: production
+    depends_on:
+      - db
+  web:
+    image: nginx:alpine
+    container_name: cha-casa-nova-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+volumes:
+  cha_casa_nova_pg:
