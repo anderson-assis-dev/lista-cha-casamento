@@ -28,7 +28,7 @@ async create(data:CreateConvidadoDTO){
 const telefone=normalizePhone(data.telefone);
 if(telefone.length<10)throw new AppError("Telefone inválido");
 const existing=await convidadoRepository.findByTelefone(telefone);
-if(existing)throw new AppError("Já recebemos uma resposta com este WhatsApp. Se precisar mudar algo, fale com o João ou a Elen 💛",409);
+if(existing)throw new AppError("Já recebemos uma resposta com este WhatsApp. Se precisar mudar algo, fale com o João ou a Ellen 💛",409);
 return serialize(await convidadoRepository.create({...data,telefone}));
 }
 private async mustExist(id:string){

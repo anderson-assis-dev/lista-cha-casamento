@@ -1,6 +1,6 @@
 export const EVENT={
-title:"Chá de Casa Nova — João & Elen",
-couple:"João & Elen",
+title:"Chá de Casa Nova — João & Ellen",
+couple:"João & Ellen",
 dateLabel:"08/11",
 dateLong:"Domingo, 8 de novembro",
 dateISO:"2026-11-08",
@@ -9,11 +9,13 @@ timeLabel:"13h",
 timeEnd:"18:00",
 venue:"Colégio Adventista de Lauro de Freitas",
 city:"Lauro de Freitas — BA",
-mapsUrl:"https://www.google.com/maps/search/?api=1&query=Col%C3%A9gio+Adventista+de+Lauro+de+Freitas",
-message:"Depois de tantos sonhos, planos e orações, estamos montando o nosso primeiro lar. E nenhuma casa fica completa sem as pessoas que a gente ama — por isso queremos você com a gente nesse momento tão especial.",
+address:"Lote 6, 7, 8, R. Marta Maria de Jesus, s/n — Miragem, Lauro de Freitas — BA, 42700-000",
+mapsUrl:"https://www.google.com/maps/search/?api=1&query=Col%C3%A9gio+Adventista+de+Lauro+de+Freitas%2C+R.+Marta+Maria+de+Jesus%2C+Miragem%2C+Lauro+de+Freitas+-+BA%2C+42700-000",
+message:"Depois de tantos sonhos, planos e orações, estamos montando o nosso primeiro lar. E nenhuma casa fica completa sem as pessoas que a gente ama. Por isso queremos você nesse momento tão especial.",
 };
 export const PHOTOS=Array.from({length:11},(_,i)=>`/fotos/${String(i+1).padStart(2,"0")}.webp`);
 export const COVER="/fotos/capa.webp";
+export const CATEGORIA_PADRINHOS="Padrinhos";
 export const PIX_SUGESTOES=[50,100,150,200,300,500];
 export type Presenca="SIM"|"NAO";
 export interface PresenteResumo{

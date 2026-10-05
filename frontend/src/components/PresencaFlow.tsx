@@ -4,11 +4,11 @@ import{z}from"zod";
 import{zodResolver}from"@hookform/resolvers/zod";
 import confetti from"canvas-confetti";
 import{QRCodeSVG}from"qrcode.react";
-import{ArrowLeft,Check,Copy,ExternalLink,Gift,HeartHandshake,Loader2,QrCode,Search,Sparkles}from"lucide-react";
+import{ArrowLeft,Check,Copy,Crown,ExternalLink,Gift,HeartHandshake,Loader2,QrCode,Search,Sparkles}from"lucide-react";
 import{Button,Input,Modal,TextArea}from"./ui";
 import{apiError,createConvidado,getPresentes,informarOutro,registrarPix,reservarPresentes}from"../lib/api";
 import{maskPixKey,resolvePixPayload}from"../lib/pix";
-import{PIX_SUGESTOES,brl,type Convidado,type PixConfig,type Presenca,type PresentePublico}from"../lib/constants";
+import{CATEGORIA_PADRINHOS,PIX_SUGESTOES,brl,type Convidado,type PixConfig,type Presenca,type PresentePublico}from"../lib/constants";
 import{saveGuest,type GuestRef}from"../hooks";
 const schema=z.object({
 nome:z.string().trim().min(2,"Conta pra gente seu nome"),
@@ -18,7 +18,7 @@ criancas:z.coerce.number().int().min(0).max(30),
 mensagem:z.string().max(500).optional(),
 });
 type FormData=z.infer<typeof schema>;
-export type FlowStep="form"|"escolha"|"lista"|"outro"|"pix-valor"|"pix-qr"|"fim";
+export type FlowStep="form"|"escolha"|"lista"|"padrinhos"|"outro"|"pix-valor"|"pix-qr"|"fim";
 const CONFETTI=["#e01e6c","#f8a7a3","#f26b1d","#fbbf24","#69a05b"];
 const MAX_ITENS=5;
 function formatPhone(v:string){
@@ -59,17 +59,22 @@ setConvidado(guest);
 setError("");
 }
 },[open,startAt,guest]);
+const ehLista=step==="lista"||step==="padrinhos";
 useEffect(()=>{
-if(step!=="lista")return;
+if(step!=="lista"&&step!=="padrinhos")return;
+setCategoria("Todos");
+setBusca("");
+setSelecionados([]);
 setLoading(true);
 getPresentes().then(setPresentes).catch(()=>setError("Não conseguimos carregar a lista agora.")).finally(()=>setLoading(false));
 },[step]);
-const categorias=useMemo(()=>["Todos",...new Set(presentes.map((p)=>p.categoria))],[presentes]);
+const daLista=useMemo(()=>presentes.filter((p)=>(p.categoria===CATEGORIA_PADRINHOS)===(step==="padrinhos")),[presentes,step]);
+const categorias=useMemo(()=>["Todos",...new Set(daLista.map((p)=>p.categoria))],[daLista]);
 const visiveis=useMemo(()=>{
 const q=busca.trim().toLowerCase();
-return presentes.filter((p)=>(categoria==="Todos"||p.categoria===categoria)&&(!q||p.nome.toLowerCase().includes(q)));
-},[presentes,categoria,busca]);
-const disponiveis=presentes.filter((p)=>!p.reservado).length;
+return daLista.filter((p)=>(categoria==="Todos"||p.categoria===categoria)&&(!q||p.nome.toLowerCase().includes(q)));
+},[daLista,categoria,busca]);
+const disponiveis=daLista.filter((p)=>!p.reservado).length;
 function resetAll(){
 setStep("form");
 setError("");
@@ -183,6 +188,7 @@ setSelecionados((s)=>s.includes(id)?s.filter((x)=>x!==id):s.length>=MAX_ITENS?s:
 const titles:Partial<Record<FlowStep,string>>={
 form:"Confirme sua presença",
 lista:"Lista de presentes",
+padrinhos:"Lista dos padrinhos",
 outro:"Outro presente",
 "pix-valor":"Presente via Pix",
 "pix-qr":"Seu Pix 💛",
@@ -194,7 +200,7 @@ const back=(to:FlowStep)=>(
 );
 const telefone=register("telefone");
 return(
-<Modal open={open} onClose={handleClose} title={titles[step]} wide={step==="lista"}>
+<Modal open={open} onClose={handleClose} title={titles[step]} wide={ehLista}>
 {step==="form"&&(
 <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
 <p className="text-sm leading-relaxed text-wine-600">Queremos preparar tudo com muito carinho, então sua resposta faz toda a diferença pra gente. 🌷</p>
@@ -257,7 +263,8 @@ className={`rounded-2xl border-2 px-3 py-3 text-sm font-medium transition ${pres
 <p className="font-display text-2xl font-semibold text-wine-800">Quer nos ajudar a montar nosso cantinho?</p>
 <p className="mt-1 text-sm leading-relaxed text-wine-600">Cada detalhe da nossa casa vai ter um pouquinho de quem a gente ama. Escolha o jeito que for melhor pra você:</p>
 <div className="mt-4 space-y-3">
-<OptionCard icon={<Gift className="h-5 w-5"/>} tone="bloom" title="Escolher da lista" text="50 sugestões pra casa — cada item só pode ser escolhido por uma pessoa." onClick={()=>setStep("lista")}/>
+<OptionCard icon={<Gift className="h-5 w-5"/>} tone="bloom" title="Escolher da lista" text="Sugestões pra casa — cada item só pode ser escolhido por uma pessoa." onClick={()=>setStep("lista")}/>
+<OptionCard icon={<Crown className="h-5 w-5"/>} tone="leaf" title="Sou padrinho ou madrinha" text="Uma lista especial, separada só para os nossos padrinhos." onClick={()=>setStep("padrinhos")}/>
 <OptionCard icon={<QrCode className="h-5 w-5"/>} tone="tangerine" title="Presentear com Pix" text="Prático e rápido: vai direto para o que ainda falta no nosso lar." onClick={()=>setStep("pix-valor")}/>
 <OptionCard icon={<Sparkles className="h-5 w-5"/>} tone="marigold" title="Levar outro presente" text="Pensou em algo especial que não está na lista? Conta pra gente!" onClick={()=>setStep("outro")}/>
 </div>
@@ -265,16 +272,17 @@ className={`rounded-2xl border-2 px-3 py-3 text-sm font-medium transition ${pres
 <Button variant="ghost" className="w-full" onClick={handleClose}>Por enquanto, só levo meu abraço 🤗</Button>
 </div>
 )}
-{step==="lista"&&(
+{ehLista&&(
 <div className="space-y-4">
 {back("escolha")}
+{step==="padrinhos"&&<p className="rounded-2xl bg-leaf-50 px-4 py-3 ring-1 ring-leaf-100 text-sm leading-relaxed text-wine-700">Padrinhos e madrinhas, que alegria ter vocês ao nosso lado! 💛 Esta lista foi pensada especialmente pra vocês.</p>}
 <p className="text-sm text-wine-600">Toque para escolher até {MAX_ITENS} itens. Os que já foram escolhidos aparecem riscados pra ninguém repetir. 😉</p>
 <div className="relative">
 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-wine-400"/>
 <input value={busca} onChange={(e)=>setBusca(e.target.value)} placeholder="Buscar item..." className="w-full rounded-full border border-bloom-100 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-bloom-100"/>
 </div>
 <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-{categorias.map((c)=>(
+{categorias.length>2&&categorias.map((c)=>(
 <button key={c} type="button" onClick={()=>setCategoria(c)} className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition ${categoria===c?"bg-bloom-500 text-white":"bg-bloom-50 text-wine-600 hover:bg-bloom-100"}`}>{c}</button>
 ))}
 </div>
@@ -305,7 +313,7 @@ className={`flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-left tra
 {visiveis.length===0&&<p className="col-span-full py-6 text-center text-sm text-wine-400">Nenhum item encontrado.</p>}
 </div>
 )}
-<p className="text-xs text-wine-400">{disponiveis} de {presentes.length} itens ainda disponíveis.</p>
+<p className="text-xs text-wine-400">{disponiveis} de {daLista.length} itens ainda disponíveis.</p>
 {error&&<p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-700">{error}</p>}
 <div className="sticky bottom-0 -mx-6 -mb-6 border-t border-bloom-100 bg-cream/95 px-6 py-4 backdrop-blur">
 <Button className="w-full" onClick={confirmarItens} disabled={loading||selecionados.length===0}>
@@ -381,7 +389,7 @@ Abra o app do seu banco, escaneie o QR Code ou use o Pix Copia e Cola, e digite 
 </>
 ):(
 <p className="rounded-2xl bg-marigold-100 px-4 py-4 text-sm leading-relaxed text-wine-700">
-Registramos sua intenção de {brl(valorNumero)} com muito carinho! A chave Pix do casal será liberada aqui em breve — volte mais tarde ou peça ao João ou à Elen. 💛
+Registramos sua intenção de {brl(valorNumero)} com muito carinho! A chave Pix do casal será liberada aqui em breve — volte mais tarde ou peça ao João ou à Ellen. 💛
 </p>
 )}
 <Button className="w-full" onClick={()=>{celebrate();setStep("fim");}}>
@@ -413,8 +421,8 @@ Registramos sua intenção de {brl(valorNumero)} com muito carinho! A chave Pix 
 </Modal>
 );
 }
-function OptionCard({icon,title,text,onClick,tone}:{icon:React.ReactNode;title:string;text:string;onClick:()=>void;tone:"bloom"|"tangerine"|"marigold"}){
-const toneClass={bloom:"bg-bloom-500",tangerine:"bg-tangerine-500",marigold:"bg-marigold-400"}[tone];
+function OptionCard({icon,title,text,onClick,tone}:{icon:React.ReactNode;title:string;text:string;onClick:()=>void;tone:"bloom"|"tangerine"|"marigold"|"leaf"}){
+const toneClass={bloom:"bg-bloom-500",tangerine:"bg-tangerine-500",marigold:"bg-marigold-400",leaf:"bg-leaf-500"}[tone];
 return(
 <button type="button" onClick={onClick} className="flex w-full items-center gap-4 rounded-2xl border border-white bg-white/90 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
 <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white ${toneClass}`}>{icon}</span>

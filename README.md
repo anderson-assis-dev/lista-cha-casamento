@@ -1,4 +1,4 @@
-# Chá de Casa Nova — João & Elen
+# Chá de Casa Nova — João & Ellen
 
 Convite online com confirmação de presença, lista de presentes (sem itens repetidos), Pix e painel administrativo com insights.
 

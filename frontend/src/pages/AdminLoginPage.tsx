@@ -43,7 +43,7 @@ return(
 </div>
 <div>
 <h1 className="font-display text-3xl font-semibold text-wine-800">Painel do Chá</h1>
-<p className="text-sm text-wine-500">Casa Nova · João &amp; Elen</p>
+<p className="text-sm text-wine-500">Casa Nova · João &amp; Ellen</p>
 </div>
 </div>
 <Input label="Usuário" autoComplete="username" error={errors.usuario?.message} {...register("usuario")}/>

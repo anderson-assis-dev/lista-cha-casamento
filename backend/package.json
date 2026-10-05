@@ -13,6 +13,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
     "db:reset-dados": "tsx prisma/seed.ts --reset",
+    "db:trocar-presentes": "tsx prisma/seed.ts --trocar-presentes",
     "prisma:studio": "prisma studio",
     "postinstall": "prisma generate",
     "build:web": "cd ../frontend && pnpm run build && rm -rf ../backend/public && mkdir -p ../backend/public && cp -R dist/. ../backend/public/"

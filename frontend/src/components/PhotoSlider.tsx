@@ -25,7 +25,7 @@ onMouseLeave={()=>setPaused(false)}
 <motion.img
 key={index}
 src={photos[index]}
-alt={`Foto ${index+1} de João e Elen`}
+alt={`Foto ${index+1} de João e Ellen`}
 className="absolute inset-0 h-full w-full cursor-grab object-cover active:cursor-grabbing"
 initial={{opacity:0,scale:1.04}}
 animate={{opacity:1,scale:1}}

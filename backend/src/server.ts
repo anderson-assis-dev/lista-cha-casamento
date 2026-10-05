@@ -46,7 +46,7 @@ if(err)next(err);
 });
 }else{
 app.get("/",(_req,res)=>{
-res.type("html").send(`<!doctype html><html lang="pt-BR"><body style="font-family:system-ui;padding:2rem"><h1>Chá de Casa Nova — João &amp; Elen — API</h1><p>Frontend ainda não foi gerado neste deploy.</p><p><a href="/api/health">/api/health</a></p></body></html>`);
+res.type("html").send(`<!doctype html><html lang="pt-BR"><body style="font-family:system-ui;padding:2rem"><h1>Chá de Casa Nova — João &amp; Ellen — API</h1><p>Frontend ainda não foi gerado neste deploy.</p><p><a href="/api/health">/api/health</a></p></body></html>`);
 });
 }
 app.use(errorHandler);

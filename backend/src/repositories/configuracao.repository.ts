@@ -8,7 +8,7 @@ update:{},
 create:{
 id:"default",
 pixChave:process.env.PIX_CHAVE??"",
-pixNome:process.env.PIX_NOME??"Joao e Elen",
+pixNome:process.env.PIX_NOME??"Joao e Ellen",
 pixCidade:process.env.PIX_CIDADE??"Lauro de Freitas",
 pixCopiaECola:process.env.PIX_COPIA_E_COLA??"",
 pixLink:process.env.PIX_LINK??"",

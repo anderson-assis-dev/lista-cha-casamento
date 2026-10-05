@@ -1,8 +1,8 @@
 import{useEffect,useMemo,useState}from"react";
-import{CalendarPlus,CheckCircle2,Clock,Copy,Gift,Heart,MapPin,QrCode,Share2,Sparkles}from"lucide-react";
+import{CalendarPlus,CheckCircle2,Clock,Copy,Crown,Gift,Heart,MapPin,QrCode,Share2,Sparkles}from"lucide-react";
 import{QRCodeSVG}from"qrcode.react";
 import{motion}from"framer-motion";
-import{COVER,EVENT,PHOTOS,type PresentePublico}from"../lib/constants";
+import{CATEGORIA_PADRINHOS,COVER,EVENT,PHOTOS,type PresentePublico}from"../lib/constants";
 import{getPresentes}from"../lib/api";
 import{loadGuest,useCountdown,type GuestRef}from"../hooks";
 import{Divider,FloralCluster,PetalsBg}from"../components/decor";
@@ -19,7 +19,10 @@ const inviteUrl=useMemo(()=>typeof window!=="undefined"?window.location.origin:"
 useEffect(()=>{
 getPresentes().then(setPresentes).catch(()=>{});
 },[flow.open]);
-const disponiveis=presentes.filter((p)=>!p.reservado).length;
+const listaConvidados=presentes.filter((p)=>p.categoria!==CATEGORIA_PADRINHOS);
+const listaPadrinhos=presentes.filter((p)=>p.categoria===CATEGORIA_PADRINHOS);
+const disponiveis=listaConvidados.filter((p)=>!p.reservado).length;
+const padrinhosDisponiveis=listaPadrinhos.filter((p)=>!p.reservado).length;
 function openPresenca(){
 setFlow({open:true,step:"form"});
 }
@@ -30,8 +33,8 @@ function addToCalendar(){
 const d=EVENT.dateISO.replace(/-/g,"");
 const start=`${d}T${EVENT.time.replace(":","")}00`;
 const end=`${d}T${EVENT.timeEnd.replace(":","")}00`;
-const details=encodeURIComponent(`${EVENT.message}\n\n${EVENT.venue} — ${EVENT.city}\n${inviteUrl}`);
-const location=encodeURIComponent(`${EVENT.venue}, ${EVENT.city}`);
+const details=encodeURIComponent(`${EVENT.message}\n\n${EVENT.venue}\n${EVENT.address}\n${inviteUrl}`);
+const location=encodeURIComponent(`${EVENT.venue}, ${EVENT.address}`);
 const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(EVENT.title)}&dates=${start}/${end}&ctz=America/Bahia&details=${details}&location=${location}`;
 window.open(url,"_blank");
 }
@@ -43,7 +46,7 @@ setTimeout(()=>setCopied(false),2000);
 async function shareInvite(){
 if(navigator.share){
 try{
-await navigator.share({title:EVENT.title,text:"Você é nosso convidado especial! 💐 Confirme sua presença no Chá de Casa Nova de João & Elen:",url:inviteUrl});
+await navigator.share({title:EVENT.title,text:"Você é nosso convidado especial! 💐 Confirme sua presença no Chá de Casa Nova de João & Ellen:",url:inviteUrl});
 return;
 }catch{/* cancelado */}
 }
@@ -52,7 +55,7 @@ await copyLink();
 return(
 <div className="relative min-h-screen overflow-x-hidden">
 <header className="no-print absolute inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-5 sm:px-10">
-<p className="font-script text-3xl text-bloom-600">J&amp;E</p>
+<img src="/logo.webp" alt="Monograma de João e Ellen" className="h-16 w-auto sm:h-20"/>
 <Button variant="outline" className="!px-4 !py-2" onClick={()=>(guest?openPresente():openPresenca())}>
 {guest?<><Gift className="h-4 w-4"/>Presentear</>:<><CheckCircle2 className="h-4 w-4"/>Confirmar</>}
 </Button>
@@ -70,7 +73,7 @@ animate={{opacity:1,y:0}}
 transition={{duration:0.8,delay:0.1}}
 className="-mx-6 mt-3 px-6 py-2 font-script text-[4.25rem] leading-[1.05] text-bouquet sm:text-8xl lg:text-[7.5rem]"
 >
-João <span className="text-5xl sm:text-7xl">&amp;</span> Elen
+João <span className="text-5xl sm:text-7xl">&amp;</span> Ellen
 </motion.h1>
 <motion.p
 initial={{opacity:0,y:16}}
@@ -78,7 +81,7 @@ animate={{opacity:1,y:0}}
 transition={{duration:0.7,delay:0.25}}
 className="mx-auto mt-5 max-w-md font-display text-2xl italic leading-snug text-wine-700 lg:mx-0"
 >
-Um novo lar, uma nova história — e queremos você com a gente.
+Um novo lar, uma nova história — e queremos você conosco.
 </motion.p>
 <motion.div
 initial={{opacity:0,y:16}}
@@ -114,7 +117,7 @@ transition={{duration:1,delay:0.15}}
 className="relative order-1 mx-auto w-full max-w-[20rem] sm:max-w-sm lg:order-2"
 >
 <div className="relative aspect-[3/4] overflow-hidden rounded-t-full rounded-b-[2.5rem] shadow-2xl shadow-bloom-900/25 ring-[6px] ring-white">
-<img src={COVER} alt="João e Elen sorrindo abraçados" className="h-full w-full object-cover object-[50%_30%]" fetchPriority="high"/>
+<img src={COVER} alt="João e Ellen sorrindo abraçados" className="h-full w-full object-cover object-[50%_30%]" fetchPriority="high"/>
 </div>
 <FloralCluster className="animate-sway absolute -bottom-10 -left-12 w-44 sm:w-56"/>
 <FloralCluster className="animate-sway absolute -right-10 -top-4 w-32 rotate-[160deg] sm:w-40"/>
@@ -127,7 +130,7 @@ className="relative order-1 mx-auto w-full max-w-[20rem] sm:max-w-sm lg:order-2"
 <p className="mt-8 font-display text-2xl leading-relaxed text-wine-800 sm:text-3xl text-balance">
 “{EVENT.message}”
 </p>
-<p className="mt-6 font-script text-4xl text-bloom-600">João &amp; Elen</p>
+<p className="mt-6 font-script text-4xl text-bloom-600">João &amp; Ellen</p>
 <p className="mt-6 text-sm italic text-wine-500">“Se o Senhor não edificar a casa, em vão trabalham os que a edificam.” — Salmos 127:1</p>
 </FadeIn>
 </section>
@@ -164,7 +167,11 @@ className="relative order-1 mx-auto w-full max-w-[20rem] sm:max-w-sm lg:order-2"
 <FadeIn delay={0.1} className="mt-10 grid gap-4 sm:grid-cols-3">
 <InfoCard icon={<CalendarPlus className="h-5 w-5"/>} tone="bg-bloom-500" label="Data" value={EVENT.dateLabel} sub={EVENT.dateLong}/>
 <InfoCard icon={<Clock className="h-5 w-5"/>} tone="bg-tangerine-500" label="Horário" value={EVENT.timeLabel} sub="Chegue um pouquinho antes 😉"/>
-<InfoCard icon={<MapPin className="h-5 w-5"/>} tone="bg-leaf-500" label="Local" value="Colégio Adventista" sub={`de Lauro de Freitas — BA`}/>
+<InfoCard icon={<MapPin className="h-5 w-5"/>} tone="bg-leaf-500" label="Local" value="Colégio Adventista" sub="de Lauro de Freitas — BA"/>
+</FadeIn>
+<FadeIn delay={0.12} className="mx-auto mt-6 max-w-xl text-center text-sm leading-relaxed text-wine-600">
+<p className="font-semibold text-wine-800">{EVENT.venue}</p>
+<p>{EVENT.address}</p>
 </FadeIn>
 <FadeIn delay={0.15} className="mt-8 flex flex-wrap justify-center gap-3">
 <a href={EVENT.mapsUrl} target="_blank" rel="noreferrer"><Button variant="outline"><MapPin className="h-4 w-4"/>Como chegar</Button></a>
@@ -187,7 +194,7 @@ preparamos algumas opções com todo carinho — escolha a que for mais fácil p
 tone="from-bloom-500 to-bloom-600"
 icon={<Gift className="h-6 w-6"/>}
 title="Lista de presentes"
-text={presentes.length?`${disponiveis} de ${presentes.length} itens ainda esperando alguém especial. Cada item só pode ser escolhido uma vez.`:"50 sugestões pra casa nova. Cada item só pode ser escolhido uma vez."}
+text={listaConvidados.length?`${disponiveis} de ${listaConvidados.length} itens ainda esperando alguém especial. Cada item só pode ser escolhido uma vez.`:"Sugestões pra casa nova. Cada item só pode ser escolhido uma vez."}
 cta="Ver a lista"
 onClick={()=>openPresente("lista")}
 />
@@ -208,17 +215,32 @@ cta="Contar meu presente"
 onClick={()=>openPresente("outro")}
 />
 </FadeIn>
-{presentes.length>0&&(
+{listaConvidados.length>0&&(
 <FadeIn delay={0.15} className="mx-auto mt-10 max-w-md">
 <div className="flex items-center justify-between text-sm text-wine-600">
 <span>Lista já escolhida</span>
-<span className="font-semibold text-bloom-600">{presentes.length-disponiveis}/{presentes.length}</span>
+<span className="font-semibold text-bloom-600">{listaConvidados.length-disponiveis}/{listaConvidados.length}</span>
 </div>
 <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-bloom-100">
-<div className="bg-bouquet h-full rounded-full transition-all duration-700" style={{width:`${((presentes.length-disponiveis)/presentes.length)*100}%`}}/>
+<div className="bg-bouquet h-full rounded-full transition-all duration-700" style={{width:`${((listaConvidados.length-disponiveis)/listaConvidados.length)*100}%`}}/>
 </div>
 </FadeIn>
 )}
+<FadeIn delay={0.2} className="mx-auto mt-14 max-w-3xl">
+<div className="relative overflow-hidden rounded-[2rem] bg-white p-8 text-center shadow-sm ring-1 ring-leaf-100 sm:p-10">
+<FloralCluster className="pointer-events-none absolute -right-10 -top-8 w-32 rotate-[160deg] opacity-90"/>
+<span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-leaf-500 to-leaf-400 text-white shadow-md"><Crown className="h-6 w-6"/></span>
+<Eyebrow className="mt-5">Padrinhos &amp; madrinhas</Eyebrow>
+<h3 className="mt-2 font-display text-3xl font-semibold text-wine-800 sm:text-4xl">Lista dos padrinhos</h3>
+<p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-wine-600">
+Vocês, que caminham tão pertinho da gente, ganharam uma lista só de vocês — com os itens maiores que vão fazer a nossa casa funcionar.
+{listaPadrinhos.length>0&&` ${padrinhosDisponiveis} de ${listaPadrinhos.length} itens ainda disponíveis.`}
+</p>
+<div className="mt-6 flex justify-center">
+<Button onClick={()=>openPresente("padrinhos")}><Crown className="h-4 w-4"/>Ver lista dos padrinhos</Button>
+</div>
+</div>
+</FadeIn>
 </div>
 </section>
 <section className="relative bg-blush px-5 py-20 sm:px-10">
@@ -249,7 +271,7 @@ onClick={()=>openPresente("outro")}
 </FadeIn>
 </section>
 <footer className="border-t border-bloom-100 bg-cream px-5 py-10 text-center">
-<p className="font-script text-4xl text-bloom-600">João &amp; Elen</p>
+<p className="font-script text-4xl text-bloom-600">João &amp; Ellen</p>
 <p className="mt-2 text-sm text-wine-500">Com amor, para quem faz parte da nossa história · 08.11.2026</p>
 </footer>
 <PresencaFlow
